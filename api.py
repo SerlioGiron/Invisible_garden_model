@@ -47,7 +47,7 @@ def load_tags():
         return []
 
 def is_coherent_text(text):
-    """Validar si el texto es coherente (más de una palabra y tiene sentido básico)"""
+    """Validar si el texto es coherente (más de una palabra y tiene sentido básico) - Soporta español e inglés"""
     text = text.strip()
     
     # 1. Verificar que no esté vacío
@@ -69,41 +69,75 @@ def is_coherent_text(text):
     if len(unique_words) < 2:
         return False
     
-    # 5. Detectar incoherencia semántica usando reglas híbridas
-    # Lista de patrones específicamente incoherentes
-    incoherent_patterns = [
+    # 5. Detectar incoherencia semántica usando reglas híbridas (español e inglés)
+    
+    # Lista de patrones específicamente incoherentes (español)
+    incoherent_patterns_es = [
         "casa azul mojado", "perro volando matemáticas", "mesa correr feliz",
         "computadora cantar verde", "silla bailar número", "árbol escribir calor",
         "teléfono dormir azúcar", "libro nadar rojo", "ventana comer fríos",
         "zapato volar música", "reloj bailar agua", "puerta correr números"
     ]
     
-    # Si es exactamente uno de estos casos, es incoherente
-    if text.lower().strip() in incoherent_patterns:
+    # Lista de patrones incoherentes (inglés)
+    incoherent_patterns_en = [
+        "house blue wet", "dog flying mathematics", "table run happy",
+        "computer sing green", "chair dance number", "tree write heat",
+        "phone sleep sugar", "book swim red", "window eat cold",
+        "shoe fly music", "clock dance water", "door run numbers"
+    ]
+    
+    text_lower = text.lower().strip()
+    if text_lower in incoherent_patterns_es or text_lower in incoherent_patterns_en:
         return False
     
     # Verificar patrones de incoherencia (sustantivo + verbo incongruente + adjetivo/sustantivo)
-    # Ejemplo: "casa cantar azul" (objeto físico + acción incompatible + descriptor)
     if len(words) == 3:
-        # Objetos físicos que no pueden realizar ciertas acciones
-        objects = {'casa', 'mesa', 'silla', 'puerta', 'ventana', 'libro', 'teléfono', 'computadora'}
-        impossible_actions = {'cantar', 'bailar', 'correr', 'volar', 'nadar', 'dormir', 'comer'}
-        
-        word1, word2, word3 = [w.lower() for w in words]
-        
-        # Si primer palabra es objeto y segunda es acción imposible
-        if word1 in objects and word2 in impossible_actions:
+        physical_objects = {
+            # Español
+            'casa', 'mesa', 'computadora', 'silla', 'árbol', 'teléfono', 'libro', 'ventana', 'zapato', 'reloj', 'puerta',
+            # Inglés
+            'house', 'table', 'computer', 'chair', 'tree', 'phone', 'book', 'window', 'shoe', 'clock', 'door'
+        }
+        action_verbs = {
+            # Español
+            'cantar', 'bailar', 'correr', 'nadar', 'volar', 'escribir', 'dormir', 'comer',
+            # Inglés
+            'sing', 'dance', 'run', 'swim', 'fly', 'write', 'sleep', 'eat'
+        }
+        if words[0].lower() in physical_objects and words[1].lower() in action_verbs:
             return False
     
-    # Verificar estructura mínima de oración en español
+    # Verificar estructura mínima de oración (español E inglés)
     structure_indicators = {
+        # ESPAÑOL
+        # Artículos
         'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas',
+        # Verbos auxiliares/comunes
         'es', 'está', 'son', 'están', 'tiene', 'tienen', 'hay', 'fue', 'era',
+        # Preposiciones
         'de', 'del', 'en', 'con', 'por', 'para', 'desde', 'hasta', 'sobre',
+        # Pronombres
         'que', 'se', 'me', 'te', 'le', 'nos', 'les', 'mi', 'tu', 'su',
+        # Adverbios comunes
         'muy', 'más', 'menos', 'bien', 'mal', 'no', 'sí', 'y', 'o', 'pero',
+        # Verbos modales/comunes
         'quiero', 'necesito', 'creo', 'pienso', 'siento', 'veo', 'escucho',
-        'necesitamos', 'queremos', 'podemos', 'debemos'
+        'necesitamos', 'queremos', 'podemos', 'debemos',
+        
+        # INGLÉS
+        # Articles
+        'the', 'a', 'an',
+        # Common verbs
+        'is', 'are', 'was', 'were', 'has', 'have', 'had', 'do', 'does', 'did',
+        # Prepositions
+        'in', 'on', 'at', 'to', 'for', 'with', 'from', 'by', 'about', 'of',
+        # Pronouns
+        'i', 'you', 'he', 'she', 'it', 'we', 'they', 'my', 'your', 'his', 'her', 'our', 'their',
+        # Common adverbs
+        'very', 'more', 'less', 'well', 'badly', 'not', 'yes', 'and', 'or', 'but',
+        # Modal/common verbs
+        'want', 'need', 'think', 'feel', 'see', 'hear', 'can', 'could', 'should', 'would'
     }
     
     text_words = set(word.lower() for word in words)
@@ -167,30 +201,32 @@ def extract_tags_from_text(text, available_tags):
     return most_relevant_tags
 
 def categorize_comment(comment):
-    """Categorizar el comentario usando LLM"""
+    """Categorize the comment using LLM - English only"""
     template = """
-    Analiza el siguiente comentario y categorizalo EXACTAMENTE en una de estas cuatro categorías:
-    - "Sugerencia": Si el comentario propone mejoras, ideas, cambios o recomendaciones constructivas
-    - "Opinion": Si el comentario expresa una opinión personal neutral o positiva, experiencias sin ser ofensivo
-    - "Queja": Si el comentario contiene lenguaje ofensivo, discriminatorio, amenazas, insultos, críticas muy negativas, o sentimientos muy negativos hacia personas (ej: "el maestro es malo", "odio a...", "es terrible", etc.)
-    - "Vida universitaria": Si el comentario se refiere específicamente a experiencias, situaciones, actividades o aspectos de la vida universitaria, académica o estudiantil que no encajan en las otras categorías
+    Analyze the following comment and categorize it EXACTLY into one of these four categories:
+    - "Suggestion": If the comment proposes improvements, ideas, changes or constructive recommendations
+    - "Opinion": If the comment expresses a neutral or positive personal opinion, experiences without being offensive
+    - "Complaint": If the comment contains offensive language, discrimination, threats, insults, very negative criticism, or very negative feelings towards people or places (e.g.: "this place is bullshit", "the teacher sucks", "I hate...", "it's terrible", etc.)
+    - "University life": If the comment specifically refers to experiences, situations, activities or aspects of university, academic or student life that do not fit into the other categories
 
-    Reglas importantes:
-    1. Responde SOLO con una de estas cuatro palabras: "Sugerencia", "Opinion", "Queja", o "Vida universitaria"
-    2. No agregues explicaciones adicionales
-    3. Comentarios negativos sobre personas (maestros, compañeros, etc.) van en "Queja"
-    4. Comentarios sobre clases, universidad, estudios, campus, etc. van en "Vida universitaria"
-    5. Si hay duda, prioriza en este orden: Queja > Vida universitaria > Sugerencia > Opinion
+    Important rules:
+    1. Respond ONLY with one of these four words: "Suggestion", "Opinion", "Complaint", or "University life"
+    2. Do not add additional explanations
+    3. Negative comments about people (teachers, classmates, etc.) or places go in "Complaint"
+    4. Comments about classes, university, studies, campus, etc. go in "University life"
+    5. If in doubt, prioritize in this order: Complaint > University life > Suggestion > Opinion
+    6. Words like "bullshit", "sucks", "terrible", "awful" are ALWAYS "Complaint"
 
-    Ejemplos:
-    - "El maestro es malo" → Queja
-    - "La clase de matemáticas es difícil" → Vida universitaria
-    - "Deberían mejorar la cafetería" → Sugerencia
-    - "Me gusta estudiar" → Opinion
+    Examples:
+    - "The teacher is terrible" → Complaint
+    - "This place is bullshit" → Complaint
+    - "Math class is challenging" → University life
+    - "They should improve the cafeteria" → Suggestion
+    - "I enjoy studying" → Opinion
 
-    Comentario: "{comment}"
+    Comment: "{comment}"
     
-    Categoría:
+    Category:
     """
     
     prompt = ChatPromptTemplate.from_template(template)
@@ -203,7 +239,7 @@ def categorize_comment(comment):
         
         # Limpiar la respuesta y validar
         category = response.strip()
-        valid_categories = ["Sugerencia", "Opinion", "Queja", "Vida universitaria"]
+        valid_categories = ["Suggestion", "Opinion", "Complaint", "University life"]
         
         if category in valid_categories:
             return category
@@ -218,21 +254,27 @@ def categorize_comment(comment):
         return "Opinion"
 
 def formalize_hate_speech(comment):
-    """Convertir comentario ofensivo a lenguaje formal y apropiado"""
+    """Convert offensive comment to formal and appropriate language - English only"""
     template = """
-    El siguiente comentario contiene lenguaje ofensivo. Conviértelo a un comentario formal, respetuoso y constructivo que exprese la misma idea pero de manera apropiada para un entorno académico o profesional.
+    You are an English language moderator. The following comment contains offensive language. Convert it to a formal, respectful and constructive comment that expresses the same idea but in a manner appropriate for an academic or professional environment.
 
-    Reglas:
-    1. Eliminar todas las palabras ofensivas, vulgaridades o insultos
-    2. Mantener la esencia del mensaje pero en tono constructivo
-    3. Usar lenguaje formal y respetuoso
-    4. Si es una queja, convertirla en feedback constructivo
-    5. Máximo 300 caracteres
-    6. Responder SOLO con el texto formalizado, sin explicaciones adicionales
+    CRITICAL RULES:
+    1. Remove all offensive words, vulgarities or insults (e.g., "bullshit", "sucks", "terrible", "awful", etc.)
+    2. Maintain the essence of the message but in a constructive tone
+    3. Use formal and respectful English language
+    4. If it's a complaint, convert it to constructive feedback
+    5. Maximum 300 characters
+    6. Respond ONLY with the formalized text in ENGLISH, without additional explanations
+    7. **MANDATORY**: Always respond in ENGLISH only. Never use Spanish or any other language.
 
-    Comentario original: "{comment}"
+    Examples:
+    - Original: "This teacher sucks" → Formalized: "I believe the teaching methodology could be improved"
+    - Original: "This place is bullshit" → Formalized: "I think this location has areas that could benefit from improvement"
+    - Original: "The cafeteria is awful" → Formalized: "The cafeteria services could be enhanced"
 
-    Comentario formalizado:
+    Original comment: "{comment}"
+
+    Formalized comment (ENGLISH ONLY):
     """
     
     prompt = ChatPromptTemplate.from_template(template)
@@ -485,7 +527,7 @@ def procesar_comentario_actual():
         comentario_final = comentario_actual
         comentario_formalizado = None
         
-        if categoria == "Queja":
+        if categoria == "Complaint":
             comentario_formalizado = formalize_hate_speech(comentario_actual)
         
         # Crear el análisis completo
@@ -496,7 +538,8 @@ def procesar_comentario_actual():
             "comentario_formalizado": comentario_formalizado,  # Solo si es Queja
             "categoria": categoria,
             "tags": tags,
-            "is_coherent": is_coherent
+            "is_coherent": is_coherent,
+            "is_offensive": categoria == "Complaint"  # TRUE si es ofensivo
         }
         
         # Guardar el análisis
@@ -574,7 +617,7 @@ def recibir_y_procesar_comentario():
         # 2.4. Si es una queja (hate speech), formalizarlo
         comentario_formalizado = None
         
-        if categoria == "Queja":
+        if categoria == "Complaint":
             comentario_formalizado = formalize_hate_speech(comentario_actual)
         
         # 2.5. Crear el análisis completo
@@ -585,7 +628,8 @@ def recibir_y_procesar_comentario():
             "comentario_formalizado": comentario_formalizado,  # Solo si es Queja
             "categoria": categoria,
             "tags": tags,
-            "is_coherent": is_coherent
+            "is_coherent": is_coherent,
+            "is_offensive": categoria == "Complaint"  # TRUE si es ofensivo
         }
         
         # 2.6. Guardar el análisis

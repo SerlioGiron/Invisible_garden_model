@@ -189,30 +189,37 @@ def extract_tags_from_text(text, available_tags):
     return most_relevant_tags
 
 def categorize_comment(comment):
-    """Categorizar el comentario usando LLM"""
+    """Categorizar el comentario usando LLM - Soporta español e inglés"""
     template = """
-    Analiza el siguiente comentario y categorízalo EXACTAMENTE en una de estas cuatro categorías:
-    - "Sugerencia": Si el comentario propone mejoras, ideas, cambios o recomendaciones constructivas
-    - "Opinion": Si el comentario expresa una opinión personal neutral o positiva, experiencias sin ser ofensivo
-    - "HateSpeech": Si el comentario contiene lenguaje ofensivo, discriminatorio, amenazas, insultos, críticas muy negativas, o sentimientos muy negativos hacia personas (ej: "el maestro es malo", "odio a...", "es terrible", etc.)
-    - "Vida universitaria": Si el comentario se refiere específicamente a experiencias, situaciones, actividades o aspectos de la vida universitaria, académica o estudiantil que no encajan en las otras categorías
+    Analyze the following comment and categorize it EXACTLY into one of these four categories:
+    - "Sugerencia": If the comment proposes improvements, ideas, changes or constructive recommendations
+    - "Opinion": If the comment expresses a neutral or positive personal opinion, experiences without being offensive
+    - "HateSpeech": If the comment contains offensive language, discrimination, threats, insults, very negative criticism, or very negative feelings towards people (e.g.: "the teacher is bad", "I hate...", "it's terrible", etc.)
+    - "Vida universitaria": If the comment specifically refers to experiences, situations, activities or aspects of university, academic or student life that do not fit into the other categories
 
-    Reglas importantes:
-    1. Responde SOLO con una de estas cuatro palabras: "Sugerencia", "Opinion", "HateSpeech", o "Vida universitaria"
-    2. No agregues explicaciones adicionales
-    3. Comentarios negativos sobre personas (maestros, compañeros, etc.) van en "HateSpeech"
-    4. Comentarios sobre clases, universidad, estudios, campus, etc. van en "Vida universitaria"
-    5. Si hay duda, prioriza en este orden: HateSpeech > Vida universitaria > Sugerencia > Opinion
+    Important rules:
+    1. Respond ONLY with one of these four words: "Sugerencia", "Opinion", "HateSpeech", or "Vida universitaria"
+    2. Do not add additional explanations
+    3. Negative comments about people (teachers, classmates, etc.) go in "HateSpeech"
+    4. Comments about classes, university, studies, campus, etc. go in "Vida universitaria"
+    5. If in doubt, prioritize in this order: HateSpeech > Vida universitaria > Sugerencia > Opinion
+    6. THE COMMENT CAN BE IN SPANISH OR ENGLISH - Detect the language and analyze accordingly
 
-    Ejemplos:
+    Examples (Spanish):
     - "El maestro es malo" → HateSpeech
     - "La clase de matemáticas es difícil" → Vida universitaria
     - "Deberían mejorar la cafetería" → Sugerencia
     - "Me gusta estudiar" → Opinion
-
-    Comentario: "{comment}"
     
-    Categoría:
+    Examples (English):
+    - "The teacher is terrible" → HateSpeech
+    - "Math class is challenging" → Vida universitaria
+    - "They should improve the cafeteria" → Sugerencia
+    - "I enjoy studying" → Opinion
+
+    Comment: "{comment}"
+    
+    Category:
     """
     
     prompt = ChatPromptTemplate.from_template(template)
@@ -242,21 +249,26 @@ def categorize_comment(comment):
         return "Opinion"  # Categoría por defecto en caso de error
 
 def formalize_hate_speech(comment):
-    """Convertir comentario ofensivo a lenguaje formal y apropiado"""
+    """Convertir comentario ofensivo a lenguaje formal y apropiado - Soporta español e inglés"""
     template = """
-    El siguiente comentario contiene lenguaje ofensivo. Conviértelo a un comentario formal, respetuoso y constructivo que exprese la misma idea pero de manera apropiada para un entorno académico o profesional.
+    You are a language moderator. The following comment contains offensive language. Convert it to a formal, respectful and constructive comment that expresses the same idea but in a manner appropriate for an academic or professional environment.
 
-    Reglas:
-    1. Eliminar todas las palabras ofensivas, vulgaridades o insultos
-    2. Mantener la esencia del mensaje pero en tono constructivo
-    3. Usar lenguaje formal y respetuoso
-    4. Si es una queja, convertirla en feedback constructivo
-    5. Máximo 2-3 líneas
-    6. Responder SOLO con el texto formalizado, sin explicaciones adicionales
+    CRITICAL RULES:
+    1. Remove all offensive words, vulgarities or insults
+    2. Maintain the essence of the message but in a constructive tone
+    3. Use formal and respectful language
+    4. If it's a complaint, convert it to constructive feedback
+    5. Maximum 2-3 lines
+    6. Respond ONLY with the formalized text, without additional explanations
+    7. **MANDATORY**: If the original comment is in ENGLISH, respond in ENGLISH. If it's in SPANISH, respond in SPANISH. NEVER change the language.
 
-    Comentario original: "{comment}"
+    Examples:
+    - Original (English): "This teacher sucks" → Formalized (English): "I believe the teaching methodology could be improved"
+    - Original (Spanish): "Este profesor es horrible" → Formalized (Spanish): "Considero que la metodología de enseñanza podría mejorar"
 
-    Comentario formalizado:
+    Original comment: "{comment}"
+
+    Formalized comment (in the SAME language as the original):
     """
     
     prompt = ChatPromptTemplate.from_template(template)

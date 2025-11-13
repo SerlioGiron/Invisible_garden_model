@@ -229,5 +229,94 @@
     "comentario": "me gusta Serlio giron es bien lindo",
     "categoria": "Opinion",
     "tags": []
+  },
+  {
+    "id": 32,
+    "timestamp": "2025-11-13T12:31:21.459613",
+    "comentario_original": "Me encanta buenos aires, es la mejor ciudad del mundo. el programa de invisible garden es grandioso",
+    "comentario_formalizado": null,
+    "categoria": "Opinion",
+    "tags": [
+      "programa"
+    ],
+    "is_coherent": true
+  },
+  {
+    "id": 33,
+    "timestamp": "2025-11-13T12:36:23.987633",
+    "comentario_original": "I love Buenos Aires, this place is such a great city. I love it. I like there are a lot of parks, and every park is always full of dogs",
+    "comentario_formalizado": null,
+    "categoria": "Opinion",
+    "tags": [],
+    "is_coherent": true
+  },
+  {
+    "id": 34,
+    "timestamp": "2025-11-13T12:36:40.448814",
+    "comentario_original": "Buenos Aires is bullshit",
+    "comentario_formalizado": "Buenos Aires enfrenta desafíos que requieren atención y mejora.",
+    "categoria": "Queja",
+    "tags": [],
+    "is_coherent": true
+  },
+  {
+    "id": 35,
+    "timestamp": "2025-11-13T12:43:12.222623",
+    "comentario_original": "Buenos Aires is bullshit",
+    "comentario_formalizado": "Considero que Buenos Aires tiene aspectos que podrían ser mejorados.",
+    "categoria": "Queja",
+    "tags": [],
+    "is_coherent": true,
+    "is_offensive": true
+  },
+  {
+    "id": 36,
+    "timestamp": "2025-11-13T12:43:51.151608",
+    "comentario_original": "Buenos Aires is bullshit",
+    "comentario_formalizado": "Considero que Buenos Aires tiene aspectos que podrían ser mejorados.",
+    "categoria": "Queja",
+    "tags": [],
+    "is_coherent": true,
+    "is_offensive": true
+  },
+  {
+    "id": 37,
+    "timestamp": "2025-11-13T12:43:54.008547",
+    "comentario_original": "Buenos Aires is bullshit",
+    "comentario_formalizado": "Considero que Buenos Aires podría mejorar en varios aspectos.",
+    "categoria": "Queja",
+    "tags": [],
+    "is_coherent": true,
+    "is_offensive": true
+  },
+  {
+    "id": 38,
+    "timestamp": "2025-11-13T12:43:56.276228",
+    "comentario_original": "Buenos Aires is bullshit",
+    "comentario_formalizado": "Considero que Buenos Aires podría mejorar en varios aspectos.",
+    "categoria": "Queja",
+    "tags": [],
+    "is_coherent": true,
+    "is_offensive": true
+  },
+  {
+    "id": 39,
+    "timestamp": "2025-11-13T12:44:07.571036",
+    "comentario_original": "Buenos Aires is bullshit",
+    "comentario_formalizado": "Considero que Buenos Aires tiene aspectos que podrían ser mejorados.",
+    "categoria": "Queja",
+    "tags": [],
+    "is_coherent": true,
+    "is_offensive": true
+  },
+  {
+    "id": 40,
+    "timestamp": "2025-11-13T12:46:43.550543",
+    "comentario_original": "Buenos Aires is bullshit",
+    "comentario_formalizado": "I think Buenos Aires has areas that could benefit from improvement.",
+    "categoria": "Complaint",
+    "tags": [],
+    "is_coherent": true,
+    "is_offensive": true
   }
 ]
